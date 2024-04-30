@@ -1,31 +1,30 @@
-name: Test Build
-
-on:
-#  push:
-#    branches:
-#      - main
-#  pull_request:
-  workflow_dispatch:
-
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Build With Gradle
-        run: |
-          chmod +x gradlew
-          ./gradlew assemblerelease --build-cache --parallel --daemon --warning-mode all
-      - name: Prepare App
-        run: |
-          mkdir -p ${{ github.workspace }}/apk/
-          for file in `find ~ -name "*.apk" -print`; do
-            mv "$file" ${{ github.workspace }}/apk/
-          done
-      - name: Upload App To Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: com.github.tvbox.osc
-          path: ${{ github.workspace }}/apk/*
+    - continue-on-error: true
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - continue-on-error: true
+      name: Build With Gradle
+      run: 'chmod +x gradlew
+
+        ./gradlew assemblerelease --build-cache --parallel --daemon --warning-mode
+        all
+
+        '
+    - continue-on-error: true
+      name: Prepare App
+      run: "mkdir -p ${{ github.workspace }}/apk/\nfor file in `find ~ -name \"*.apk\"\
+        \ -print`; do\n  mv \"$file\" ${{ github.workspace }}/apk/\ndone\n"
+    - continue-on-error: true
+      name: Upload App To Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: com.github.tvbox.osc
+        path: ${{ github.workspace }}/apk/*
+name: Test Build
+on:
+  repository_dispatch:
+    types: trigger-ga___test.yml
